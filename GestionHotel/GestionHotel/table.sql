@@ -27,6 +27,6 @@ CREATE TABLE [dbo].[Room]
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY(1,1), 
     [Number] INT NOT NULL, 
     [HotelId] INT NOT NULL, 
-    [OccupatedMax] INT NOT NULL
+    [OccupatedMax] INT NOT NULL,
 [Status] INT NULL, 
 )
