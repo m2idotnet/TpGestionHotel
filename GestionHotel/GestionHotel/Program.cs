@@ -102,8 +102,10 @@ namespace GestionHotel
                         Number = i,
                         HotelId = h.Id,
                         OccupatedMax = r.Next(2, 4),
-                        Status = RoomStatus.Free
+                        Status = RoomStatus.Free,
+                        
                     };
+                    room.Price = room.OccupatedMax == 3 ? 50 : 40;
                     room.Save();
                 }
             }
@@ -216,10 +218,44 @@ namespace GestionHotel
                 {
                     Console.WriteLine(b);
                 }
+                List<Booking> bookingsUnpaid = Booking.GetBookings(c.Id).FindAll(x => x.StatusInvoice == InvoiceStatus.notPaid);
+                decimal total = 0;
+                foreach (Booking b in bookingsUnpaid)
+                {
+                    Room r = new Room(b.RoomId);
+                    total += r.Price;
+                }
+                Console.WriteLine($"You have to pay : {total}");
+                Console.WriteLine("1- Paid");
+                Console.WriteLine("2- Not paid");
+                int number;
+                Int32.TryParse(Console.ReadLine(), out number);
+                if(number == 1)
+                {
+                    Paid(c.Id, total, bookingsUnpaid);
+                }
             }
             else
             {
                 Console.WriteLine("Customer not found");
+            }
+        }
+
+        static void Paid(int idCustomer, decimal total, List<Booking> bs)
+        {
+            Invoice i = new Invoice()
+            {
+                Price = total,
+                CustomerId = idCustomer,
+                Status = InvoiceStatus.paid
+            };
+
+            if (i.Save())
+            {
+                foreach(Booking b in bs)
+                {
+                    b.UpdateStatus(InvoiceStatus.paid);
+                }
             }
         }
 
@@ -242,26 +278,27 @@ namespace GestionHotel
                     {
                         Console.Write("How many persons ? : ");
                         Int32.TryParse(Console.ReadLine(), out number);
-                        do
-                        {
-                            Console.Write("Room's number : ");
-                            int n = Convert.ToInt32(Console.ReadLine());
-                            Room room = Room.GetRoomsByStatus(RoomStatus.Free).Find(x => x.Number == n);
-                            Booking b = new Booking() {
-                                CustomerId = c.Id,
-                                RoomId = room.Id,
-                                OccupatedNumber = (number > room.OccupatedMax) ? room.OccupatedMax : number,
-                                Status = BookingStatus.Validated
-                            };
-                            if (b.Save())
-                            {
-                                room.UpdateStatus(RoomStatus.Busy);
-                                number -= room.OccupatedMax;
-                            }
-                        }
-                        while (number >= 0);
                     }
                     while (number == 0);
+                    do
+                    {
+                        Console.Write("Room's number : ");
+                        int n = Convert.ToInt32(Console.ReadLine());
+                        Room room = Room.GetRoomsByStatus(RoomStatus.Free).Find(x => x.Number == n);
+                        Booking b = new Booking()
+                        {
+                            CustomerId = c.Id,
+                            RoomId = room.Id,
+                            OccupatedNumber = (number > room.OccupatedMax) ? room.OccupatedMax : number,
+                            Status = BookingStatus.Validated
+                        };
+                        if (b.Save())
+                        {
+                            room.UpdateStatus(RoomStatus.Busy);
+                            number -= room.OccupatedMax;
+                        }
+                    }
+                    while (number > 0);
                 }
                 else
                 {

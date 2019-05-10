@@ -13,13 +13,14 @@ namespace GestionHotel.Classes
         private int occupatedMax;
         private static SqlCommand command;
         private RoomStatus status;
+        private decimal price;
 
         public int Id { get => id; set => id = value; }
         public int Number { get => number; set => number = value; }
         public int HotelId { get => hotelId; set => hotelId = value; }
         public int OccupatedMax { get => occupatedMax; set => occupatedMax = value; }
         public RoomStatus Status { get => status; set => status = value; }
-
+        public decimal Price { get => price; set => price = value; }
 
         public Room()
         {
@@ -38,6 +39,7 @@ namespace GestionHotel.Classes
                 HotelId = reader.GetInt32(2);
                 OccupatedMax = reader.GetInt32(3);
                 Status = (RoomStatus)reader.GetInt32(4);
+                Price = reader.GetDecimal(5);
             }
             reader.Close();
             command.Dispose();
@@ -47,11 +49,12 @@ namespace GestionHotel.Classes
         public bool Save()
         {
             bool res = false;
-            command = new SqlCommand("INSERT INTO Room(Number, HotelId, OccupatedMax, Status) OUTPUT INSERTED.ID values(@n,@h,@o,@s)", Connection.Instance);
+            command = new SqlCommand("INSERT INTO Room(Number, HotelId, OccupatedMax, Status, Price) OUTPUT INSERTED.ID values(@n,@h,@o,@s,@p)", Connection.Instance);
             command.Parameters.Add(new SqlParameter("@n", Number));
             command.Parameters.Add(new SqlParameter("@h", HotelId));
             command.Parameters.Add(new SqlParameter("@o", OccupatedMax));
             command.Parameters.Add(new SqlParameter("@s", Status));
+            command.Parameters.Add(new SqlParameter("@p", Price));
             Connection.Instance.Open();
             Id = (int)command.ExecuteScalar();
             command.Dispose();
@@ -81,6 +84,7 @@ namespace GestionHotel.Classes
             string res = "Room Number : " + Number;
             res += " Status : " + Status;
             res += " Occupated Max : " + OccupatedMax;
+            res += $" price : {Price}";
             return res;
         }
 
@@ -99,7 +103,9 @@ namespace GestionHotel.Classes
                     Number = reader.GetInt32(1),
                     HotelId = reader.GetInt32(2),
                     OccupatedMax = reader.GetInt32(3),
-                    Status =s
+                    Status = s,
+                    Price = reader.GetDecimal(5)
+                    
                 };
                 res.Add(r);
             }

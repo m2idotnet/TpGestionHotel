@@ -15,6 +15,7 @@ CREATE TABLE [dbo].[Booking]
     [RoomId] INT NOT NULL, 
     [OccupatedNumber] INT NOT NULL, 
     [status] INT NOT NULL,
+	[invoiceStatus] INT NOT NULL DEFAULT 1, 
 )
 CREATE TABLE [dbo].[Hotel]
 (
@@ -28,5 +29,14 @@ CREATE TABLE [dbo].[Room]
     [Number] INT NOT NULL, 
     [HotelId] INT NOT NULL, 
     [OccupatedMax] INT NOT NULL,
+	[price] DECIMAL NOT NULL, 
 [Status] INT NULL, 
 )
+CREATE TABLE [dbo].[invoice] (
+    [Id]         INT          IDENTITY (1, 1) NOT NULL,
+    [CustomerId] INT          NOT NULL,
+    [Price]      DECIMAL (18) NOT NULL,
+    [Status] INT NOT NULL, 
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+

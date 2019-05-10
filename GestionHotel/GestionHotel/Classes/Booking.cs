@@ -13,6 +13,8 @@ namespace GestionHotel.Classes
         private int roomId;
         private int occupatedNumber;
         private BookingStatus status;
+        private InvoiceStatus statusInvoice;
+
         private static SqlCommand command;
 
         public int Id { get => id; set => id = value; }
@@ -21,6 +23,7 @@ namespace GestionHotel.Classes
         public int RoomId { get => roomId; set => roomId = value; }
         public int OccupatedNumber { get => occupatedNumber; set => occupatedNumber = value; }
         public BookingStatus Status { get => status; set => status = value; }
+        public InvoiceStatus StatusInvoice { get => statusInvoice; set => statusInvoice = value; }
 
         public Booking()
         {
@@ -41,7 +44,7 @@ namespace GestionHotel.Classes
                 RoomId = reader.GetInt32(3);
                 OccupatedNumber = reader.GetInt32(4);
                 status = (BookingStatus)reader.GetInt32(5);
-                
+                StatusInvoice = (InvoiceStatus)reader.GetInt32(6);
             }
             reader.Close();
             command.Dispose();
@@ -76,6 +79,18 @@ namespace GestionHotel.Classes
             Connection.Instance.Close();
             return res;
         }
+        public bool UpdateStatus(InvoiceStatus s)
+        {
+            bool res = false;
+            command = new SqlCommand("UPDATE Booking set InvoiceStatus = @s WHERE Id = @i", Connection.Instance);
+            command.Parameters.Add(new SqlParameter("@s", s));
+            command.Parameters.Add(new SqlParameter("@i", Id));
+            Connection.Instance.Open();
+            res = command.ExecuteNonQuery() > 0;
+            command.Dispose();
+            Connection.Instance.Close();
+            return res;
+        }
 
         public static List<Booking> GetBookings(int customerId)
         {
@@ -93,7 +108,8 @@ namespace GestionHotel.Classes
                     CustomerId = reader.GetInt32(2),
                     RoomId = reader.GetInt32(3),
                     OccupatedNumber = reader.GetInt32(4),
-                    Status = (BookingStatus)reader.GetInt32(5)
+                    Status = (BookingStatus)reader.GetInt32(5),
+                    StatusInvoice = (InvoiceStatus) reader.GetInt32(6)
                 };
                 res.Add(b);
             }
@@ -119,7 +135,8 @@ namespace GestionHotel.Classes
                     CustomerId = reader.GetInt32(2),
                     RoomId = reader.GetInt32(3),
                     OccupatedNumber = reader.GetInt32(4),
-                    Status = (BookingStatus)reader.GetInt32(5)
+                    Status = (BookingStatus)reader.GetInt32(5),
+                    StatusInvoice = (InvoiceStatus)reader.GetInt32(6)
                 };
                 res.Add(b);
             }
@@ -134,6 +151,7 @@ namespace GestionHotel.Classes
             string res = "Code : " + Code;
             res += " Status : " + Status;
             res += " Customer Id : " + CustomerId;
+            res += $" paiment status : {StatusInvoice}";
             return res;
         }
     }
