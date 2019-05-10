@@ -13,7 +13,7 @@ namespace GestionHotel.Classes
         private int roomId;
         private int occupatedNumber;
         private BookingStatus status;
-        private SqlCommand command;
+        private static SqlCommand command;
 
         public int Id { get => id; set => id = value; }
         public string Code { get => code; set => code = value; }
@@ -21,6 +21,11 @@ namespace GestionHotel.Classes
         public int RoomId { get => roomId; set => roomId = value; }
         public int OccupatedNumber { get => occupatedNumber; set => occupatedNumber = value; }
         public BookingStatus Status { get => status; set => status = value; }
+
+        public Booking()
+        {
+            Code = Guid.NewGuid().ToString();
+        }
 
         public bool Save()
         {
@@ -46,6 +51,32 @@ namespace GestionHotel.Classes
             command.Parameters.Add(new SqlParameter("@i", Id));
             Connection.Instance.Open();
             res = command.ExecuteNonQuery() > 0;
+            command.Dispose();
+            Connection.Instance.Close();
+            return res;
+        }
+
+        public static List<Booking> GetBookings(int customerId)
+        {
+            List<Booking> res = new List<Booking>();
+            command = new SqlCommand("SELECT * FROM Booking WHERE CustomerId = @c", Connection.Instance);
+            command.Parameters.Add(new SqlParameter("@c", customerId));
+            Connection.Instance.Open();
+            SqlDataReader reader = command.ExecuteReader();
+            while(reader.Read())
+            {
+                Booking b = new Booking()
+                {
+                    Id = reader.GetInt32(0),
+                    Code = reader.GetString(1),
+                    CustomerId = reader.GetInt32(2),
+                    RoomId = reader.GetInt32(3),
+                    OccupatedNumber = reader.GetInt32(4),
+                    Status = (BookingStatus)reader.GetInt32(5)
+                };
+                res.Add(b);
+            }
+            reader.Close();
             command.Dispose();
             Connection.Instance.Close();
             return res;

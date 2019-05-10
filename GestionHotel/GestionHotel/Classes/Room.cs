@@ -11,7 +11,7 @@ namespace GestionHotel.Classes
         private int number;
         private int hotelId;
         private int occupatedMax;
-        private SqlCommand command;
+        private static SqlCommand command;
         private RoomStatus status;
 
         public int Id { get => id; set => id = value; }
@@ -56,6 +56,32 @@ namespace GestionHotel.Classes
         {
             string res = "Room Number : " + Number;
             res += " Status : " + Status;
+            res += " Occupated Max : " + OccupatedMax;
+            return res;
+        }
+
+        public static List<Room> GetRoomsByStatus(RoomStatus s)
+        {
+            List<Room> res = new List<Room>();
+            command = new SqlCommand("SELECT * FROM Room WHERE Status = @s", Connection.Instance);
+            command.Parameters.Add(new SqlParameter("@s", s));
+            Connection.Instance.Open();
+            SqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                Room r = new Room
+                {
+                    Id = reader.GetInt32(0),
+                    Number = reader.GetInt32(1),
+                    HotelId = reader.GetInt32(2),
+                    OccupatedMax = reader.GetInt32(3),
+                    Status =s
+                };
+                res.Add(r);
+            }
+            reader.Close();
+            command.Dispose();
+            Connection.Instance.Close();
             return res;
         }
     }

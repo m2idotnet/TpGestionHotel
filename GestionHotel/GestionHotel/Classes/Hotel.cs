@@ -21,6 +21,23 @@ namespace GestionHotel.Classes
 
         }
 
+        public Hotel(string n)
+        {
+            command = new SqlCommand("SELECT * FROM Hotel WHERE Name = @n", Connection.Instance);
+            command.Parameters.Add(new SqlParameter("@n", n));
+            Connection.Instance.Open();
+            SqlDataReader reader = command.ExecuteReader();
+            if(reader.Read())
+            {
+                Id = reader.GetInt32(0);
+                Name = reader.GetString(1);
+                RoomsNumber = reader.GetInt32(2);
+            }
+            reader.Close();
+            command.Dispose();
+            Connection.Instance.Close();
+        }
+
         public bool Save()
         {
             bool res = false;
