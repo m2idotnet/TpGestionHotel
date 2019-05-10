@@ -5,7 +5,7 @@
     [lastName] VARCHAR(50) NOT NULL, 
     [phone] VARCHAR(50) NOT NULL, 
     [address] VARCHAR(MAX) NOT NULL,
-[hotelId] INT NOT NULL,
+[hotelId] INT NOT NULL, 
 )
 CREATE TABLE [dbo].[Booking]
 (
