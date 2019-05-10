@@ -27,6 +27,27 @@ namespace GestionHotel.Classes
             Code = Guid.NewGuid().ToString();
         }
 
+        public Booking(string c)
+        {
+            command = new SqlCommand("SELECT * FROM Booking WHERE Code = @c", Connection.Instance);
+            command.Parameters.Add(new SqlParameter("@c", c));
+            Connection.Instance.Open();
+            SqlDataReader reader = command.ExecuteReader();
+            if (reader.Read())
+            {
+                Id = reader.GetInt32(0);
+                Code = reader.GetString(1);
+                CustomerId = reader.GetInt32(2);
+                RoomId = reader.GetInt32(3);
+                OccupatedNumber = reader.GetInt32(4);
+                status = (BookingStatus)reader.GetInt32(5);
+                
+            }
+            reader.Close();
+            command.Dispose();
+            Connection.Instance.Close();
+        }
+
         public bool Save()
         {
             bool res = false;
@@ -82,12 +103,38 @@ namespace GestionHotel.Classes
             return res;
         }
 
+        public static List<Booking> GetBookingsByHotelId(int id)
+        {
+            List<Booking> res = new List<Booking>();
+            command = new SqlCommand("SELECT b.id, b.code, b.customerId, b.roomId, b.occupatedNumber, b.status FROM Booking as b inner join room as r on r.id = b.roomId WHERE r.HotelId = @i", Connection.Instance);
+            command.Parameters.Add(new SqlParameter("@i", id));
+            Connection.Instance.Open();
+            SqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                Booking b = new Booking()
+                {
+                    Id = reader.GetInt32(0),
+                    Code = reader.GetString(1),
+                    CustomerId = reader.GetInt32(2),
+                    RoomId = reader.GetInt32(3),
+                    OccupatedNumber = reader.GetInt32(4),
+                    Status = (BookingStatus)reader.GetInt32(5)
+                };
+                res.Add(b);
+            }
+            reader.Close();
+            command.Dispose();
+            Connection.Instance.Close();
+            return res;
+        }
+
         public override string ToString()
         {
             string res = "Code : " + Code;
             res += " Status : " + Status;
             res += " Customer Id : " + CustomerId;
-            return base.ToString();
+            return res;
         }
     }
 

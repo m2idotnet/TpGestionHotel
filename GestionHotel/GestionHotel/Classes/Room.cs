@@ -20,6 +20,30 @@ namespace GestionHotel.Classes
         public int OccupatedMax { get => occupatedMax; set => occupatedMax = value; }
         public RoomStatus Status { get => status; set => status = value; }
 
+
+        public Room()
+        {
+
+        }
+        public Room(int i)
+        {
+            command = new SqlCommand("SELECT * FROM room where id = @i", Connection.Instance);
+            command.Parameters.Add(new SqlParameter("@i", i));
+            Connection.Instance.Open();
+            SqlDataReader reader = command.ExecuteReader();
+            if(reader.Read())
+            {
+                Id = reader.GetInt32(0);
+                Number = reader.GetInt32(1);
+                HotelId = reader.GetInt32(2);
+                OccupatedMax = reader.GetInt32(3);
+                Status = (RoomStatus)reader.GetInt32(4);
+            }
+            reader.Close();
+            command.Dispose();
+            Connection.Instance.Close();
+        }
+
         public bool Save()
         {
             bool res = false;

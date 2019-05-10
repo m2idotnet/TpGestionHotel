@@ -45,6 +45,26 @@ namespace GestionHotel.Classes
             Connection.Instance.Close();
         }
 
+        public Customer(int i)
+        {
+            command = new SqlCommand("SELECT * FROM Customer WHERE Id = @i", Connection.Instance);
+            command.Parameters.Add(new SqlParameter("@i", i));
+            Connection.Instance.Open();
+            SqlDataReader reader = command.ExecuteReader();
+            if (reader.Read())
+            {
+                Id = reader.GetInt32(0);
+                FirstName = reader.GetString(1);
+                LastName = reader.GetString(2);
+                Phone = reader.GetString(3);
+                Address = reader.GetString(4);
+                HotelId = reader.GetInt32(5);
+            }
+            reader.Close();
+            command.Dispose();
+            Connection.Instance.Close();
+        }
+
         public bool Save()
         {
             bool res = false;
